@@ -1,12 +1,12 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Partials } = require('discord.js');
+const { logStartup, setupShutdownLogging } = require('./utils/botLogger')
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages], partials: [Partials.Channel] });
 client.commands = new Collection();
 
-// Load command files from the "commands" folder.
 const commandFiles = fs
   .readdirSync(path.join(__dirname, 'commands'))
   .filter(file => file.endsWith('.js'));
@@ -16,12 +16,12 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-client.once('ready', () => {
-  console.log(`Logged in as ${client.user.tag}`);
+client.once('ready', async () => {
+  await logStartup(client);
+  setupShutdownLogging(client);
 });
 
 client.on('interactionCreate', async interaction => {
-  // Handle autocomplete interactions.
   if (interaction.isAutocomplete()) {
     const command = client.commands.get(interaction.commandName);
     if (command && command.autocomplete) {
@@ -34,7 +34,6 @@ client.on('interactionCreate', async interaction => {
     return;
   }
 
-  // Handle slash commands.
   if (!interaction.isChatInputCommand()) return;
   const command = client.commands.get(interaction.commandName);
   if (!command) return;

@@ -1,17 +1,33 @@
 require('dotenv').config();
 const fs = require('fs');
 const sharp = require('sharp');
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const path = require('path');
+const { SlashCommandBuilder, AttachmentBuilder, InteractionContextType } = require('discord.js');
+
+const stickersFile = path.join(__dirname, '../stickers.json'); // Path to stickers.json
+let stickerData = {};
+
+if (fs.existsSync(stickersFile)) {
+  stickerData = JSON.parse(fs.readFileSync(stickersFile, 'utf8'));
+} else {
+  console.warn("stickers.json not found. Autocomplete will work without emojis.");
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('sticker')
     .setDescription('Resize and send a sticker')
+    .setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM])
     .addStringOption(option =>
       option.setName('name')
         .setDescription('The name of the sticker')
         .setRequired(true)
         .setAutocomplete(true)
+    )
+    .addStringOption(option => 
+        option.setName('caption')
+            .setDescription('The message sent together with sticker')
+            .setRequired(false)
     )
     .addIntegerOption(option =>
       option.setName('size')
@@ -33,7 +49,12 @@ module.exports = {
     const filtered = stickerNames.filter(name =>
       name.toLowerCase().startsWith(focusedValue.toLowerCase())
     );
-    const suggestions = filtered.slice(0, 25).map(name => ({ name, value: name }));
+    
+    const suggestions = filtered.slice(0, 25).map(name => ({
+        name: `${stickerData[name]?.emoji || ''} ${name}`.trim(), // Add emoji if exists
+        value: name
+    }));
+  
     await interaction.respond(suggestions);
     return;
   },
@@ -50,7 +71,7 @@ module.exports = {
       const attachment = new AttachmentBuilder(resizedBuffer, {
         name: `${stickerName}-${size}x${size}.png`,
       });
-      await interaction.reply({ files: [attachment] });
+      await interaction.reply({ content: interaction.options.getString('caption') || null, files: [attachment] });
     } catch (error) {
       console.error('Error processing sticker:', error);
       await interaction.reply({
