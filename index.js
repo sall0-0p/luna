@@ -19,6 +19,41 @@ for (const file of commandFiles) {
 client.once('ready', async () => {
   await logStartup(client);
   setupShutdownLogging(client);
+
+  const statuses = [
+    { name: "over Equestria", type: 3 }, 
+    { name: "Ukrainians fighting for freedom", type: 3 },
+    { name: "Luna's Royal Orders", type: 2 }, 
+    { name: "with magic spells", type: 0 }, 
+    { name: "the night sky", type: 3 }, 
+    { name: "Celestia’s nonsense", type: 2 },
+    { name: "ponies arguing in chat", type: 3 }, 
+    { name: "for royal decrees", type: 2 }, 
+    { name: "the moon’s whispers", type: 2 }, 
+    { name: "Twilight’s lectures", type: 2 }, 
+    { name: "the Canterlot Gossip", type: 3 },
+    { name: "ponies make bad life choices", type: 3 }, 
+    { name: "royal taxes being wasted", type: 3 }, 
+    { name: "Celestia take credit for my work", type: 3 }, 
+    { name: "ponies struggle with basic math", type: 3 }, 
+    { name: "the royal treasury drain", type: 3 },
+    { name: "ponies speedrun bad decisions", type: 3 }, 
+    { name: "Celestia snore", type: 2 },
+    { name: "ponies scream at each other", type: 2 },
+    { name: "the cries of sleep-deprived students", type: 2 },
+    { name: "Fluttershy whisper ASMR", type: 2 }, 
+    { name: "Rainbow Dash complain about everything", type: 2 }, 
+    { name: "ponies write fanfiction about me", type: 3 },
+    { name: "the chaos unfold", type: 3 }, 
+    { name: "ponies misquote royal history", type: 3 },
+    { name: "the sun set... finally", type: 3 },
+  ];
+
+  let index = 0;
+  setInterval(() => {
+    client.user.setPresence({ activities: [statuses[index]], status: 'idle' });
+    index = (index + 1) % statuses.length;
+  }, 10000); // Changes status every 10 seconds
 });
 
 client.on('interactionCreate', async interaction => {
