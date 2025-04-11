@@ -12,7 +12,7 @@ async function sendDM(client, message) {
   
 async function logStartup(client) {
     console.log(`Logged in as ${client.user.tag}`);
-    await sendDM(client, "I am back from the stars, here to guard the dreams of mortal ponies!");
+    await sendDM(client, "I am back from the stars, here to guard the dreams of mortal ponies! I was also auto-deployed.");
 }
 
 function setupShutdownLogging(client) {
