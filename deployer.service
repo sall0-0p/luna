@@ -1,0 +1,14 @@
+[Unit]
+Description=Deployer Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/projects/luna
+ExecStart=/usr/bin/node /root/projects/luna/webhook.js
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
