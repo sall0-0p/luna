@@ -46,12 +46,14 @@ module.exports = {
     } catch (err) {
       console.error('Error reading stickers directory:', err);
     }
-    const filtered = stickerNames.filter(name =>
-      name.toLowerCase().startsWith(focusedValue.toLowerCase())
-    );
+
+    const filtered = stickerNames.filter(name => {
+      const parts = name.toLowerCase().split('_');
+      return parts.some(part => part.startsWith(focusedValue.toLowerCase()));
+    });
     
     const suggestions = filtered.slice(0, 25).map(name => ({
-        name: `${stickerData[name]?.emoji || ''} ${name}`.trim(), // Add emoji if exists
+        name: `${stickerData[name]?.emoji || ''} ${name}`.trim(),
         value: name
     }));
   
@@ -71,7 +73,9 @@ module.exports = {
       const attachment = new AttachmentBuilder(resizedBuffer, {
         name: `${stickerName}-${size}x${size}.png`,
       });
+
       await interaction.reply({ content: interaction.options.getString('caption') || null, files: [attachment] });
+
     } catch (error) {
       console.error('Error processing sticker:', error);
       await interaction.reply({
