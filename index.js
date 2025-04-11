@@ -1,6 +1,3 @@
-// ticketbot
-require("./misc/ticketbot/src/index")
-
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
