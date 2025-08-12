@@ -67,21 +67,38 @@ module.exports = {
     const filePath = `./stickers/${stickerName}.png`;
 
     try {
-      const resizedBuffer = await sharp(filePath)
-        .resize(size, size)
-        .toBuffer();
-      const attachment = new AttachmentBuilder(resizedBuffer, {
-        name: `${stickerName}-${size}x${size}.png`,
-      });
+        // Get metadata to check original dimensions
+        const metadata = await sharp(filePath).metadata();
+        const { width, height } = metadata;
 
-      await interaction.reply({ content: interaction.options.getString('caption') || null, files: [attachment] });
+        let resizedBuffer;
+        if (width === height) {
+            // Square: resize both dimensions
+            resizedBuffer = await sharp(filePath)
+                .resize(size, size)
+                .toBuffer();
+        } else {
+            // Non-square: keep aspect ratio, set only height
+            resizedBuffer = await sharp(filePath)
+                .resize({ height: size }) // width auto-calculated
+                .toBuffer();
+        }
+
+        const attachment = new AttachmentBuilder(resizedBuffer, {
+            name: `${stickerName}-${width === height ? `${size}x${size}` : `h${size}`}.png`,
+        });
+
+        await interaction.reply({
+            content: interaction.options.getString('caption') || null,
+            files: [attachment],
+        });
 
     } catch (error) {
-      console.error('Error processing sticker:', error);
-      await interaction.reply({
-        content: 'Sorry, something went wrong while processing the sticker.',
-        ephemeral: true,
-      });
+        console.error('Error processing sticker:', error);
+        await interaction.reply({
+            content: 'Sorry, something went wrong while processing the sticker.',
+            ephemeral: true,
+        });
     }
-  },
+  }
 };
